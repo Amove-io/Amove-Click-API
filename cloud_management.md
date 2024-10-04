@@ -1,6 +1,40 @@
 # Cloud Management
 
-The Cloud Management endpoints allow you to manage cloud accounts, buckets, objects, and perform various cloud-related operations across different cloud providers.
+## Index of Endpoints
+
+1. [Get All Cloud Accounts](#get-all-cloud-accounts)
+2. [Get Specific Cloud Account](#get-specific-cloud-account)
+3. [Add Cloud Account](#add-cloud-account)
+4. [Delete Cloud Account](#delete-cloud-account)
+5. [List Buckets](#list-buckets)
+6. [List Objects](#list-objects)
+7. [Generate Download URL](#generate-download-url)
+8. [Send Download URL](#send-download-url)
+9. [Delete Object](#delete-object)
+10. [Create Folder](#create-folder)
+11. [Upload Object](#upload-object)
+12. [Download Object](#download-object)
+13. [Add Storage](#add-storage)
+14. [Delete Storage](#delete-storage)
+15. [Create Bucket](#create-bucket)
+16. [Delete Bucket](#delete-bucket)
+17. [Get Bucket Info](#get-bucket-info)
+18. [Get Cloud Info](#get-cloud-info)
+19. [IDrive Add Storage](#idrive-add-storage)
+20. [IDrive Delete Storage](#idrive-delete-storage)
+21. [IDrive Create Bucket](#idrive-create-bucket)
+22. [IDrive Delete Bucket](#idrive-delete-bucket)
+23. [IDrive Regions](#idrive-regions)
+24. [IDrive Get Daily Usage](#idrive-get-daily-usage)
+25. [IDrive Get Usage](#idrive-get-usage)
+26. [Generate Dropbox Authorization URL](#generate-dropbox-authorization-url)
+27. [Dropbox Authorization Callback](#dropbox-authorization-callback)
+28. [Generate Box Authorization URL](#generate-box-authorization-url)
+29. [Box Authorization Callback](#box-authorization-callback)
+30. [Generate OneDrive Authorization URL](#generate-onedrive-authorization-url)
+31. [OneDrive Authorization Callback](#onedrive-authorization-callback)
+32. [Generate Google Drive Authorization URL](#generate-google-drive-authorization-url)
+33. [Google Drive Authorization Callback](#google-drive-authorization-callback)
 
 ## Endpoints
 
@@ -462,6 +496,404 @@ A CloudInfoResponse object:
 }
 ```
 
+### IDrive Add Storage
+
+Add IDrive storage to a cloud account.
+
+- **URL**: `/Cloud/idrive_add_storage`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A CreateIDriveStorageRequest object:
+
+```json
+{
+  "firstname": "string",
+  "userEmail": "string",
+  "cloudAccountName": "string",
+  "bucketTitle": "string",
+  "region": "string",
+  "defaultPassword": "string",
+  "shared": true,
+  "storageTier": 0
+}
+```
+
+#### Response
+
+The created CloudAccount object.
+
+### IDrive Delete Storage
+
+Delete IDrive storage from a cloud account.
+
+- **URL**: `/Cloud/idrive_delete_storage`
+- **Method**: DELETE
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `id`: uuid (required)
+- `token`: string (required)
+
+#### Response
+
+A boolean indicating success or failure.
+
+### IDrive Create Bucket
+
+Create a new bucket in IDrive storage.
+
+- **URL**: `/Cloud/idrive_create_bucket`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `bucketName`: string (required)
+- `cloudAccountId`: uuid (required)
+- `token`: string (required)
+
+### IDrive Delete Bucket
+
+Delete a bucket from IDrive storage.
+
+- **URL**: `/Cloud/idrive_delete_bucket`
+- **Method**: DELETE
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `bucketName`: string (required)
+- `cloudAccountId`: uuid (required)
+- `token`: string (required)
+
+### IDrive Regions
+
+Get available IDrive regions.
+
+- **URL**: `/Cloud/idrive_regions`
+- **Method**: GET
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Response
+
+An array of IDriveRegion objects:
+
+```json
+[
+  {
+    "name": "string",
+    "code": "string"
+  }
+]
+```
+
+### IDrive Get Daily Usage
+
+Get daily usage for IDrive storage.
+
+- **URL**: `/Cloud/idrive_get_daily_usage`
+- **Method**: GET
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+- `storageTier`: integer (enum)
+
+#### Response
+
+A double value representing the daily usage.
+
+### IDrive Get Usage
+
+Get total usage for IDrive storage.
+
+- **URL**: `/Cloud/idrive_get_usage`
+- **Method**: GET
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+- `storageTier`: integer (enum)
+
+#### Response
+
+A double value representing the total usage.
+
+### Generate Dropbox Authorization URL
+
+Generate an authorization URL for Dropbox.
+
+- **URL**: `/Cloud/generate_dropbox_authorization_url`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A DropboxGenerateURLRequest object:
+
+```json
+{
+  "redirectURL": "string",
+  "cloudName": "string"
+}
+```
+
+#### Response
+
+A string containing the authorization URL.
+
+### Dropbox Authorization Callback
+
+Handle the Dropbox authorization callback.
+
+- **URL**: `/Cloud/dropbox_authorization_callback`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A DropboxAuthorizationCallbackRequest object:
+
+```json
+{
+  "code": "string",
+  "state": "string",
+  "redirectURL": "string"
+}
+```
+
+#### Response
+
+The created CloudAccount object.
+
+### Generate Box Authorization URL
+
+Generate an authorization URL for Box.
+
+- **URL**: `/Cloud/generate_box_authorization_url`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A BoxGenerateURLRequest object:
+
+```json
+{
+  "redirectURL": "string",
+  "cloudName": "string"
+}
+```
+
+#### Response
+
+A string containing the authorization URL.
+
+### Box Authorization Callback
+
+Handle the Box authorization callback.
+
+- **URL**: `/Cloud/box_authorization_callback`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A BoxAuthorizationCallbackRequest object:
+
+```json
+{
+  "code": "string",
+  "state": "string",
+  "redirectURL": "string"
+}
+```
+
+#### Response
+
+The created CloudAccount object.
+
+### Generate OneDrive Authorization URL
+
+Generate an authorization URL for OneDrive.
+
+- **URL**: `/Cloud/generate_onedrive_authorization_url`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A OneDriveGenerateURLRequest object:
+
+```json
+{
+  "cloudName": "string",
+  "redirectURL": "string"
+}
+```
+
+#### Response
+
+A string containing the authorization URL.
+
+### OneDrive Authorization Callback
+
+Handle the OneDrive authorization callback.
+
+- **URL**: `/Cloud/onedrive_authorization_callback`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A OneDriveAuthorizationCallbackRequest object:
+
+```json
+{
+  "code": "string",
+  "state": "string",
+  "error": "string",
+  "errorDescription": "string",
+  "redirectURL": "string"
+}
+```
+
+#### Response
+
+The created CloudAccount object.
+
+### Generate Google Drive Authorization URL
+
+Generate an authorization URL for Google Drive.
+
+- **URL**: `/Cloud/generate_googledrive_authorization_url`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A GoogleDriveGenerateURLRequest object:
+
+```json
+{
+  "cloudName": "string",
+  "redirectURL": "string"
+}
+```
+
+#### Response
+
+A string containing the authorization URL.
+
+### Google Drive Authorization Callback
+
+Handle the Google Drive authorization callback.
+
+- **URL**: `/Cloud/googledrive_authorization_callback`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `token`: string (required)
+
+#### Request Body
+
+A GoogleDriveAuthorizationCallbackRequest object:
+
+```json
+{
+  "code": "string",
+  "state": "string",
+  "error": "string",
+  "errorDescription": "string",
+  "redirectURL": "string"
+}
+```
+
+#### Response
+
+The created CloudAccount object.
+
+### Upload Object from Form
+
+Upload an object to a bucket using a form.
+
+- **URL**: `/Cloud/upload_object_from_form`
+- **Method**: POST
+- **Auth Required**: Yes
+
+#### Request Body
+
+Multipart form data:
+
+- `CloudAccountJson`: string
+- `StorageName`: string
+- `UploadPath`: string
+- `File`: file
+- `Id`: string
+- `Name`: string
+
+### Get Object Stream
+
+Get a stream of object data.
+
+- **URL**: `/Cloud/get_object_stream`
+- **Method**: GET
+- **Auth Required**: Yes
+
+#### Query Parameters
+
+- `path`: string (required)
+- `start`: integer (optional)
+- `end`: integer (optional)
+
+#### Response
+
+A stream of object data.
+
 ## Sample Code
 
 Here's an example of how to list buckets using Python:
@@ -499,5 +931,24 @@ if buckets:
         print(f"Bucket: {bucket['name']}, Region: {bucket['region']}")
 ```
 
-For other programming languages, you can use their respective HTTP client libraries to make similar requests to the API endpoints.
+This code demonstrates how to use the list_buckets endpoint. You can create similar functions for other endpoints using the appropriate HTTP methods and request/response structures.
+
+## Error Handling
+
+The API uses standard HTTP status codes to indicate the success or failure of requests. Common status codes include:
+
+- 200: OK - The request was successful
+- 400: Bad Request - The request was invalid or cannot be served
+- 401: Unauthorized - Authentication failed or user doesn't have permissions for the requested operation
+- 403: Forbidden - The request is not allowed
+- 404: Not Found - The requested resource could not be found
+- 500: Internal Server Error - The server encountered an unexpected condition
+
+When an error occurs, the response body may contain additional information about the error. Always check the status code and handle errors appropriately in your applications.
+
+## Conclusion
+
+This documentation covers all the Cloud Management endpoints available in the AmoveAgent API. It includes details on managing cloud accounts, buckets, objects, and integrations with various cloud storage providers. Use these endpoints to build robust cloud management features in your applications.
+
+Remember to handle authentication properly and respect rate limits if any are imposed by the API. For the most up-to-date information, always refer to the official API documentation provided by AmoveAgent.
 
