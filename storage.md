@@ -158,7 +158,7 @@ Here's an example of how to create a new storage bucket using Python:
 ```python
 import requests
 
-API_BASE_URL = "https://api.amoveagent.com"
+API_BASE_URL = "http://localhost:29123"
 TOKEN = "your_token_here"
 
 def create_bucket(cloud_account_id, bucket_name, is_public=False, is_encrypted=True, versioning_enabled=True, object_lock_enabled=False):
