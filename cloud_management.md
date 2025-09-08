@@ -901,7 +901,7 @@ Here's an example of how to list buckets using Python:
 ```python
 import requests
 
-API_BASE_URL = "https://api.amoveagent.com"
+API_BASE_URL = "http://localhost:29123"
 TOKEN = "your_token_here"
 
 def list_buckets(cloud_account, include_region=False):
