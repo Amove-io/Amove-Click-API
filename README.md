@@ -37,7 +37,7 @@ Here's a basic example of how to make an API call using Python and the `requests
 ```python
 import requests
 
-API_BASE_URL = "https://api.amoveagent.com"
+API_BASE_URL = "http://localhost:29123/"
 TOKEN = "your_token_here"
 
 response = requests.get(f"{API_BASE_URL}/User/get_all_users", params={"token": TOKEN})
