@@ -131,7 +131,7 @@ Here's an example of how to create a new transfer operation using Python:
 ```python
 import requests
 
-API_BASE_URL = "https://api.amoveagent.com"
+API_BASE_URL = "http://localhost:29123"
 TOKEN = "your_token_here"
 
 def create_transfer(source_account_id, source_bucket, source_path, dest_account_id, dest_bucket, dest_path, allow_skip=True):
