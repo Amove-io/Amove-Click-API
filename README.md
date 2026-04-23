@@ -1,87 +1,115 @@
-# Amove Click (AmoveAgent) API Documentation
+# AMove Click API Documentation
 
 ## Introduction
 
-The AmoveAgent API provides a comprehensive set of endpoints for managing cloud storage, user authentication, project management, and various other functionalities. This API is designed to facilitate seamless integration with cloud storage services, user management, and project collaboration.
+The Click API is a local HTTP service exposed by the Amove desktop agent on the machine where it is installed. It allows scripted integration with drives, backups, transfers, and related desktop-side operations.
+
+> This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service and cannot be reached remotely.
+
+## Table of Contents
+
+1. [Base URL](#base-url)
+2. [Authentication](#authentication)
+3. [API Endpoints](#api-endpoints)
+4. [Error Model](#error-model)
+5. [WebSockets](#websockets)
+6. [Routes](#routes)
+7. [Differences from the Web API](#differences-from-the-web-api)
+8. [Getting Started](#getting-started)
+
+## Base URL
+
+```
+http://localhost:29123
+```
+
+The port is configurable via the agent's `appsettings.HostUrl` configuration; `29123` is the default.
 
 ## Authentication
 
-Most endpoints in this API require authentication. Authentication is typically done using a token, which should be included in the query parameters of the request. For example:
+Protected endpoints accept a token as a **query-string parameter** (`?token=...`), not an `Authorization` header.
 
 ```
-GET /endpoint?token=your_token_here
+GET http://localhost:29123/user/get_all_users?token=YOUR_TOKEN
 ```
 
-Some endpoints may require different authentication methods, such as JWT tokens or session-based authentication. Please refer to the specific endpoint documentation for detailed authentication requirements.
+To obtain a token, use the [Authentication](authentication.md) endpoints — for example, `POST /authentication/login` with username and password. The agent uses the same JWT-based session model as the AMove Web API.
 
-## Main Endpoint Categories
+Some endpoints are public (no token required) — primarily signup and initial login flows. These are listed with "Auth Required: No".
 
-1. Authentication
-2. Cloud Management
-3. Projects
-4. User Management
-5. Storage
-6. Transfer
-7. Billing
+## API Endpoints
+
+Endpoints are grouped by controller. Each file below documents one controller:
+
+- [Authentication](authentication.md) — sign up, login, MFA, profile management
+- [User](user.md) — user account management
+- [UserGroup](usergroup.md) — user group management
+- [UsersPermission](userspermission.md) — permissions for projects and shared drives
+- [Projects](projects.md) — project management
+- [SharedCloudDrive](sharedclouddrive.md) — shared cloud drive management
+- [Cloud](cloud.md) — cloud accounts, storage operations, OAuth, P2P transfers
+- [Storage](storage.md) — storage access keys and bucket administration
+- [Transfer](transfer.md) — cloud-to-cloud transfers
+- [TransferHistory](transferhistory.md) — historical transfer records
+- [Billing](billing.md) — subscription status and plan management
+- [SSO](sso.md) — single sign-on configuration (Okta, SAML, Entra ID)
+- [Fastr](fastr.md) — Fastr P2P server management
+- [FastrSettings](fastr_settings.md) — Fastr settings per cloud account
+- [AdSignal](adsignal.md) — material management and comparison
+- [ApiToken](apitoken.md) — API token management
+- [AccountLogSetting](accountlogsetting.md) — account log configuration
+- [BackupReport](backupreport.md) — backup reporting endpoints
+- [DriveReport](drivereport.md) — drive reporting endpoints
+- [Management](management.md) — local agent management (drives, backups, mounts, file system)
+
+Cross-cutting documents:
+
+- [WebSockets](websockets.md) — real-time notification channels
+- [Error Model](errors.md) — HTTP status codes and application error codes
+
+## Error Model
+
+The Click API uses **HTTP 499** for application-level validation errors, **401 Unauthorized** for authentication failures, and **500 Internal Server Error** for unexpected server errors. See [errors.md](errors.md) for full details and the list of application error codes.
+
+## WebSockets
+
+Two WebSocket endpoints push real-time events from the agent:
+
+| Path | Purpose |
+|---|---|
+| `/notification` | User-level notifications (progress, announcements, app lifecycle) |
+| `/statechange` | File state change events (cache, offline status, sync state) |
+
+See [websockets.md](websockets.md) for frame formats and sample clients.
+
+## Routes
+
+Click API routes are of the form `/<controller>/<action>`. There is no `/api/v1/` prefix.
+
+## Differences from the Web API
+
+| Aspect | Web API (`api.amove.io`) | Click API (`localhost:29123`) |
+|---|---|---|
+| Host | Hosted service | Local desktop agent |
+| Path prefix | `/api/v1/...` | `/<controller>/...` |
+| Auth transport | `Authorization: Bearer` header | `?token=` query parameter |
+| CORS | Broadly open | Restricted to configured origins |
+| Real-time | SignalR hub at `/api/rm` | Native WebSockets at `/notification` and `/statechange` |
 
 ## Getting Started
 
-To get started with the AmoveAgent API:
-
-1. Sign up for an account (if required)
-2. Obtain your API token
-3. Make your first API call using your preferred programming language or tool
-
-Here's a basic example of how to make an API call using Python and the `requests` library:
+1. Install and sign in to the Amove desktop agent on the target machine.
+2. Confirm the agent is running — a GET to `http://localhost:29123/management/agent_status` returns a status object without requiring a token.
+3. Obtain a token via the [Authentication](authentication.md) flow.
+4. Call any protected endpoint with the token as a query parameter.
 
 ```python
 import requests
 
-API_BASE_URL = "http://localhost:29123/"
-TOKEN = "your_token_here"
-
-response = requests.get(f"{API_BASE_URL}/User/get_all_users", params={"token": TOKEN})
-
-if response.status_code == 200:
-    users = response.json()
-    print(users)
-else:
-    print(f"Error: {response.status_code}")
-    print(response.text)
+token = "YOUR_TOKEN"
+response = requests.get(
+    "http://localhost:29123/user/get_all_users",
+    params={"token": token, "page": 1, "pagesize": 10},
+)
+print(response.json())
 ```
-
-## Detailed Documentation
-
-For detailed information about specific endpoints, please refer to the following documentation:
-
-- [Authentication](authentication.md)
-- [Cloud Management](cloud_management.md)
-- [Projects](projects.md)
-- [User Management](user_management.md)
-- [Storage](storage.md)
-- [Transfer](transfer.md)
-- [Billing](billing.md)
-
-## Error Handling
-
-The API uses standard HTTP status codes to indicate the success or failure of requests. Common status codes include:
-
-- 200: OK - The request was successful
-- 400: Bad Request - The request was invalid or cannot be served
-- 401: Unauthorized - Authentication failed or user doesn't have permissions for the requested operation
-- 403: Forbidden - The request is not allowed
-- 404: Not Found - The requested resource could not be found
-- 500: Internal Server Error - The server encountered an unexpected condition
-
-For more detailed error information, check the response body, which may contain additional error details and messages.
-
-## Support and Resources
-
-For additional support or questions about the API, please contact our support team at support@amoveagent.com.
-
-API Reference: [Full API Reference](https://api.amoveagent.com/docs)
-
-## SDKs and Libraries
-
-Currently, there are no official SDKs or client libraries for the AmoveAgent API. However, you can use any HTTP client library in your preferred programming language to interact with the API.
-

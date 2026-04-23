@@ -1,194 +1,298 @@
-# Storage
+# Storage Endpoints
 
-The Storage endpoints allow you to manage storage keys, create and manage buckets, and perform various storage-related operations.
+This document provides detailed information about the storage administration endpoints exposed by the Amove desktop agent's Click API. These endpoints manage Amove-issued storage access keys and operate on IDrive-backed buckets.
+
+> This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 
 ## Endpoints
 
-### Get Storage Keys
+1. [Get Storage Keys](#get-storage-keys)
+2. [Create Storage Key](#create-storage-key)
+3. [Delete Storage Key](#delete-storage-key)
+4. [Create Bucket](#create-bucket)
+5. [Bucket Status](#bucket-status)
+6. [Update Bucket](#update-bucket)
+7. [Delete Bucket](#delete-bucket)
 
-Retrieve all storage keys associated with the authenticated user.
 
-- **URL**: `/Storage/get_storage_key`
+## Get Storage Keys
+
+Returns the paginated list of storage access keys issued for the current account.
+
+- **URL**: `/storage/get_storage_key`
 - **Method**: GET
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
-- `page`: integer (default: 1)
-- `pagesize`: integer (default: 50)
-- `sortfield`: string (default: "CreateDate")
-- `descending`: boolean (default: true)
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| token | string | — | Session token |
+| page | integer | 1 | Starting page |
+| pagesize | integer | 50 | Page size |
+| sortfield | string | "CreateDate" | Field to sort by |
+| descending | boolean | true | Sort direction |
 
-#### Response
+### Response
 
-A StorageApiKeyDTOCollection containing an array of StorageApiKey objects:
+Returns a `DTOCollection<StorageApiKey>`. Secret keys are never returned on this endpoint — only the public `accessKey`, `name`, `region`, `storageDn`, `storageTier`, and `createDate`.
 
-```json
-{
-  "data": [
-    {
-      "id": "uuid",
-      "userId": "uuid",
-      "accountId": "uuid",
-      "name": "string",
-      "accessKey": "string",
-      "description": "string",
-      "region": "string",
-      "storageDn": "string",
-      "storageTier": 0,
-      "createDate": "2023-05-05T12:00:00Z"
-    }
-  ],
-  "total": 0,
-  "options": {
-    "pageSize": 0,
-    "page": 0,
-    "sort": [
-      {
-        "field": "string",
-        "descending": true
-      }
-    ]
-  }
-}
-```
 
-### Create Storage Key
+## Create Storage Key
 
-Create a new storage key.
+Creates a new storage access key. The response is the only time the secret key is returned to the caller.
 
-- **URL**: `/Storage/create_storage_key`
+- **URL**: `/storage/create_storage_key`
 - **Method**: POST
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| token | string | Session token |
 
-#### Request Body
-
-A StorageCreateAccessRequest object:
+### Request Body
 
 ```json
 {
-  "name": "string",
-  "region": "string",
-  "storageDn": "string",
-  "permission": 0,
-  "allBuckets": true,
-  "selectedBuckets": [
-    "string"
-  ],
-  "cloudAccountId": "uuid"
+  "name": "ci-deploy",
+  "region": "us-west-1",
+  "storageDn": "example.storage.amove.io",
+  "permission": 2,
+  "allBuckets": false,
+  "selectedBuckets": ["my-bucket-1", "my-bucket-2"],
+  "cloudAccountId": "00000000-0000-0000-0000-000000000000"
 }
 ```
 
-#### Response
+| Field | Type | Description |
+|-------|------|-------------|
+| name | string | Human-readable key name |
+| region | string | Storage region |
+| storageDn | string | Storage endpoint DN |
+| permission | integer (enum) | `0` Read, `1` Write, `2` ReadWrite |
+| allBuckets | boolean | When true, the key applies to all buckets under the account |
+| selectedBuckets | array | Bucket name allow-list when `allBuckets` is false |
+| cloudAccountId | string (uuid) | Cloud account id the key belongs to |
 
-A ShowStorageApiKey object containing the created storage key information.
+### Response
 
-### Create Bucket
+Returns a `ShowStorageApiKey` object which includes the plain-text `secretKey` in addition to the fields of `StorageApiKey`. Store the secret immediately — it cannot be retrieved again.
 
-Create a new storage bucket.
 
-- **URL**: `/Storage/create_bucket`
+## Delete Storage Key
+
+Deletes a previously issued storage access key.
+
+- **URL**: `/storage/delete_storage_key`
+- **Method**: DELETE
+- **Auth Required**: Yes
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string (uuid) | Storage key id |
+| token | string | Session token |
+
+### Response
+
+Returns HTTP 200 on success.
+
+
+## Create Bucket
+
+Creates a bucket inside the IDrive storage associated with the given cloud account.
+
+- **URL**: `/storage/create_bucket`
 - **Method**: POST
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| token | string | Session token |
 
-#### Request Body
-
-A StorageCreateBucketRequest object:
+### Request Body
 
 ```json
 {
-  "cloudAccountId": "uuid",
-  "bucketName": "string",
-  "isPublic": true,
+  "cloudAccountId": "00000000-0000-0000-0000-000000000000",
+  "bucketName": "my-new-bucket",
+  "isPublic": false,
   "isEncrypted": true,
-  "versioningEnabled": true,
-  "objectLockEnabled": true
+  "versioningEnabled": false,
+  "objectLockEnabled": false
 }
 ```
 
-### Get Bucket Status
+### Response
 
-Retrieve the status of a specific bucket.
+Returns HTTP 200 on success.
 
-- **URL**: `/Storage/bucket_status`
+
+## Bucket Status
+
+Retrieves the current status flags of an existing bucket.
+
+- **URL**: `/storage/bucket_status`
 - **Method**: POST
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| token | string | Session token |
 
-#### Request Body
-
-A StorageGetBucketStatusRequest object:
-
-```json
-{
-  "cloudAccountId": "uuid",
-  "bucketName": "string"
-}
-```
-
-#### Response
-
-A BucketStatus object:
+### Request Body
 
 ```json
 {
-  "versioningEnabled": true,
-  "encryptionEnabled": true,
-  "isPublic": true,
-  "objectLockEnabled": true
+  "cloudAccountId": "00000000-0000-0000-0000-000000000000",
+  "bucketName": "my-bucket"
 }
 ```
+
+### Response
+
+Returns a `BucketStatus` object describing encryption, versioning, object-lock, and public-access state for the bucket.
+
+
+## Update Bucket
+
+Updates configuration flags on an existing bucket.
+
+- **URL**: `/storage/update_bucket`
+- **Method**: PUT
+- **Auth Required**: Yes
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| token | string | Session token |
+
+### Request Body
+
+```json
+{
+  "cloudAccountId": "00000000-0000-0000-0000-000000000000",
+  "bucketName": "my-bucket",
+  "isPublic": false,
+  "isEncrypted": true,
+  "versioningEnabled": true
+}
+```
+
+### Response
+
+Returns HTTP 200 on success.
+
+
+## Delete Bucket
+
+Deletes a bucket from the IDrive storage associated with the given cloud account.
+
+- **URL**: `/storage/delete_bucket`
+- **Method**: DELETE
+- **Auth Required**: Yes
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| cloudAccountId | string (uuid) | Cloud account id that owns the bucket |
+| bucketName | string | Name of the bucket to delete |
+| token | string | Session token |
+
+### Response
+
+Returns HTTP 200 on success.
+
 
 ## Sample Code
 
-Here's an example of how to create a new storage bucket using Python:
+### Create and Retrieve a Storage Key
+
+<details>
+<summary>Python</summary>
 
 ```python
 import requests
 
-API_BASE_URL = "http://localhost:29123"
-TOKEN = "your_token_here"
-
-def create_bucket(cloud_account_id, bucket_name, is_public=False, is_encrypted=True, versioning_enabled=True, object_lock_enabled=False):
-    url = f"{API_BASE_URL}/Storage/create_bucket"
-    params = {"token": TOKEN}
-    data = {
-        "cloudAccountId": cloud_account_id,
-        "bucketName": bucket_name,
-        "isPublic": is_public,
-        "isEncrypted": is_encrypted,
-        "versioningEnabled": versioning_enabled,
-        "objectLockEnabled": object_lock_enabled
-    }
-    
-    response = requests.post(url, json=data, params=params)
-    
-    if response.status_code == 200:
-        return True
-    else:
-        print(f"Error: {response.status_code}")
-        print(response.text)
-        return False
-
-# Usage
-success = create_bucket("your_cloud_account_id", "my-new-bucket", is_public=False, is_encrypted=True)
-if success:
-    print("Bucket created successfully")
-else:
-    print("Failed to create bucket")
+response = requests.post(
+    "http://localhost:29123/storage/create_storage_key",
+    params={"token": "EXAMPLE_TOKEN"},
+    json={
+        "name": "ci-deploy",
+        "region": "us-west-1",
+        "storageDn": "example.storage.amove.io",
+        "permission": 2,
+        "allBuckets": True,
+        "selectedBuckets": [],
+        "cloudAccountId": "00000000-0000-0000-0000-000000000000",
+    },
+)
+key = response.json()
+print("Access key:", key["accessKey"])
+print("Secret key:", key["secretKey"])  # Store this now; cannot be retrieved again.
 ```
 
-For other programming languages, you can use their respective HTTP client libraries to make similar requests to the API endpoints.
+</details>
 
+<details>
+<summary>JavaScript</summary>
+
+```javascript
+const res = await fetch(
+  "http://localhost:29123/storage/create_storage_key?token=EXAMPLE_TOKEN",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "ci-deploy",
+      region: "us-west-1",
+      storageDn: "example.storage.amove.io",
+      permission: 2,
+      allBuckets: true,
+      selectedBuckets: [],
+      cloudAccountId: "00000000-0000-0000-0000-000000000000",
+    }),
+  }
+);
+const key = await res.json();
+console.log(key.accessKey, key.secretKey);
+```
+
+</details>
+
+### Create a Bucket
+
+<details>
+<summary>Python</summary>
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:29123/storage/create_bucket",
+    params={"token": "EXAMPLE_TOKEN"},
+    json={
+        "cloudAccountId": "00000000-0000-0000-0000-000000000000",
+        "bucketName": "my-new-bucket",
+        "isPublic": False,
+        "isEncrypted": True,
+        "versioningEnabled": False,
+        "objectLockEnabled": False,
+    },
+)
+print(response.status_code)
+```
+
+</details>
+
+
+For error handling, see [Error Model](errors.md).

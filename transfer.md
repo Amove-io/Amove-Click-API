@@ -1,175 +1,207 @@
-# Transfer
+# Transfer Endpoints
 
-The Transfer endpoints allow you to manage and monitor data transfer operations between cloud storage accounts or buckets.
+This document provides detailed information about the cloud-to-cloud transfer endpoints exposed by the Amove desktop agent's Click API. Use these endpoints to list existing transfers, queue a new transfer, or cancel a running one.
+
+> This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 
 ## Endpoints
 
-### Get All Transfers
+1. [Get All Transfers](#get-all-transfers)
+2. [Transfer](#transfer)
+3. [Cancel Transfer](#cancel-transfer)
 
-Retrieve all transfer operations.
 
-- **URL**: `/Transfer/get_all`
+## Get All Transfers
+
+Returns the paginated list of transfers associated with the current user's account, filtered by transfer type.
+
+- **URL**: `/transfer/get_all`
 - **Method**: GET
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
-- `page`: integer (default: 1)
-- `pagesize`: integer (default: 50)
-- `sortfield`: string (default: "RequestDate")
-- `descending`: boolean (default: true)
-- `type`: integer (default: 15)
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| token | string | — | Session token |
+| page | integer | 1 | Starting page |
+| pagesize | integer | 50 | Page size |
+| sortfield | string | "RequestDate" | Field to sort by |
+| descending | boolean | true | Sort direction |
+| type | integer (flags) | 15 | Bitwise OR of `TransferType` values (see below) |
 
-#### Response
+The `type` parameter is a bitmask over `TransferType`:
 
-A TransferDTOCollection containing an array of Transfer objects:
+| Value | Meaning |
+|---|---|
+| `1` | Transfer |
+| `2` | Sync |
+| `4` | SyncInitTransfer |
+| `8` | ManualTransfer |
 
-```json
-{
-  "data": [
-    {
-      "id": "uuid",
-      "userId": "uuid",
-      "syncCycleId": "uuid",
-      "sourceCloudAccountId": "uuid",
-      "sourceBucket": "string",
-      "sourceRegion": "string",
-      "sourcePath": "string",
-      "destinationCloudAccountId": "uuid",
-      "destinationBucket": "string",
-      "destinationRegion": "string",
-      "destinationPath": "string",
-      "requestDate": "2023-05-05T12:00:00Z",
-      "startDate": "2023-05-05T12:00:00Z",
-      "endDate": "2023-05-05T12:00:00Z",
-      "transferStatus": 0,
-      "transferType": 0,
-      "allowSkip": true,
-      "allowDelete": false,
-      "total": 0,
-      "failed": 0,
-      "deleted": 0,
-      "skipped": 0,
-      "skippedSize": 0,
-      "transferred": 0,
-      "totalSize": 0,
-      "transferredSize": 0,
-      "percent": 0,
-      "averageSpeed": 0,
-      "transferredCost": 0
-    }
-  ],
-  "total": 0,
-  "options": {
-    "pageSize": 0,
-    "page": 0,
-    "sort": [
-      {
-        "field": "string",
-        "descending": true
-      }
-    ]
-  }
-}
-```
+The default `15` (`1 + 2 + 4 + 8`) returns every transfer type.
 
-### Create Transfer
+### Response
 
-Create a new transfer operation.
+Returns a `DTOCollection<Transfer>`.
 
-- **URL**: `/Transfer/transfer`
+
+## Transfer
+
+Queues a new cloud-to-cloud transfer from a source cloud account/bucket/path to a destination cloud account/bucket/path.
+
+- **URL**: `/transfer/transfer`
 - **Method**: POST
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| token | string | Session token |
 
-#### Request Body
-
-A TransferRequest object:
+### Request Body
 
 ```json
 {
-  "sourceCloudAccountId": "uuid",
-  "sourceBucket": "string",
-  "sourcePath": "string",
-  "destinationCloudAccountId": "uuid",
-  "destinationBucket": "string",
-  "destinationPath": "string",
-  "allowSkip": true
+  "sourceCloudAccountId": "00000000-0000-0000-0000-000000000000",
+  "sourceBucket": "source-bucket",
+  "sourceBucketId": "",
+  "sourcePath": "folder/file.mov",
+  "sourceId": "",
+  "destinationCloudAccountId": "11111111-1111-1111-1111-111111111111",
+  "destinationBucket": "destination-bucket",
+  "destinationBucketId": "",
+  "destinationPath": "archive/folder/",
+  "destinationId": "",
+  "allowSkip": true,
+  "keepSourceTree": false
 }
 ```
 
-### Cancel Transfer
+| Field | Type | Description |
+|-------|------|-------------|
+| sourceCloudAccountId | string (uuid) | Cloud account the source objects live in |
+| sourceBucket | string | Source bucket name |
+| sourceBucketId | string | Optional source bucket id (used by parent-style providers) |
+| sourcePath | string | Path (key prefix) of the source object or folder |
+| sourceId | string | Optional source object id (used by parent-style providers) |
+| destinationCloudAccountId | string (uuid) | Cloud account the destination lives in |
+| destinationBucket | string | Destination bucket name |
+| destinationBucketId | string | Optional destination bucket id |
+| destinationPath | string | Path under which the source objects will be placed |
+| destinationId | string | Optional destination object id |
+| allowSkip | boolean | Skip transfer when a newer version already exists at the destination |
+| keepSourceTree | boolean | Preserve the source folder tree under the destination path |
 
-Cancel an ongoing transfer operation.
+### Response
 
-- **URL**: `/Transfer/cancel_transfer`
+Returns HTTP 200 when the transfer has been queued. Progress and completion are delivered out-of-band via the WebSocket notification channel.
+
+
+## Cancel Transfer
+
+Sends a cancel request to a running transfer.
+
+- **URL**: `/transfer/cancel_transfer`
 - **Method**: POST
 - **Auth Required**: Yes
 
-#### Query Parameters
+### Query Parameters
 
-- `token`: string (required)
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| token | string | Session token |
 
-#### Request Body
-
-A GuidEntityReuest object:
+### Request Body
 
 ```json
 {
-  "id": "uuid"
+  "id": "00000000-0000-0000-0000-000000000000"
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| id | string (uuid) | Transfer id to cancel |
+
+### Response
+
+Returns HTTP 200 on success.
+
 
 ## Sample Code
 
-Here's an example of how to create a new transfer operation using Python:
+### Queue a Transfer
+
+<details>
+<summary>Python</summary>
 
 ```python
 import requests
 
-API_BASE_URL = "http://localhost:29123"
-TOKEN = "your_token_here"
-
-def create_transfer(source_account_id, source_bucket, source_path, dest_account_id, dest_bucket, dest_path, allow_skip=True):
-    url = f"{API_BASE_URL}/Transfer/transfer"
-    params = {"token": TOKEN}
-    data = {
-        "sourceCloudAccountId": source_account_id,
-        "sourceBucket": source_bucket,
-        "sourcePath": source_path,
-        "destinationCloudAccountId": dest_account_id,
-        "destinationBucket": dest_bucket,
-        "destinationPath": dest_path,
-        "allowSkip": allow_skip
-    }
-    
-    response = requests.post(url, json=data, params=params)
-    
-    if response.status_code == 200:
-        return True
-    else:
-        print(f"Error: {response.status_code}")
-        print(response.text)
-        return False
-
-# Usage
-success = create_transfer(
-    "source_account_id",
-    "source-bucket",
-    "/source/path",
-    "dest_account_id",
-    "dest-bucket",
-    "/dest/path"
+response = requests.post(
+    "http://localhost:29123/transfer/transfer",
+    params={"token": "EXAMPLE_TOKEN"},
+    json={
+        "sourceCloudAccountId": "00000000-0000-0000-0000-000000000000",
+        "sourceBucket": "source-bucket",
+        "sourcePath": "folder/",
+        "destinationCloudAccountId": "11111111-1111-1111-1111-111111111111",
+        "destinationBucket": "destination-bucket",
+        "destinationPath": "archive/folder/",
+        "allowSkip": True,
+        "keepSourceTree": False,
+    },
 )
-if success:
-    print("Transfer operation created successfully")
-else:
-    print("Failed to create transfer operation")
+print(response.status_code)
 ```
 
-For other programming languages, you can use their respective HTTP client libraries to make similar requests to the API endpoints.
+</details>
 
+<details>
+<summary>JavaScript</summary>
+
+```javascript
+const res = await fetch(
+  "http://localhost:29123/transfer/transfer?token=EXAMPLE_TOKEN",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sourceCloudAccountId: "00000000-0000-0000-0000-000000000000",
+      sourceBucket: "source-bucket",
+      sourcePath: "folder/",
+      destinationCloudAccountId: "11111111-1111-1111-1111-111111111111",
+      destinationBucket: "destination-bucket",
+      destinationPath: "archive/folder/",
+      allowSkip: true,
+      keepSourceTree: false,
+    }),
+  }
+);
+console.log(res.status);
+```
+
+</details>
+
+### Cancel a Running Transfer
+
+<details>
+<summary>Python</summary>
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:29123/transfer/cancel_transfer",
+    params={"token": "EXAMPLE_TOKEN"},
+    json={"id": "00000000-0000-0000-0000-000000000000"},
+)
+print(response.status_code)
+```
+
+</details>
+
+
+For error handling, see [Error Model](errors.md).
