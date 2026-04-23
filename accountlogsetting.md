@@ -1,6 +1,6 @@
 # Account Log Setting Endpoints
 
-This document provides detailed information about the account-log-setting endpoints in the AMove Click API. These endpoints configure an external log destination (for example, Splunk) for the account.
+This document provides detailed information about the account-log-setting endpoints in the Amove Click API. These endpoints configure an external log destination (for example, Splunk) for the account.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

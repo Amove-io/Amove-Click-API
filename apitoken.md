@@ -1,6 +1,6 @@
 # API Token Endpoints
 
-This document provides detailed information about the API-token management endpoints in the AMove Click API. API tokens are long-lived credentials a user can generate for automated callers.
+This document provides detailed information about the API-token management endpoints in the Amove Click API. API tokens are long-lived credentials a user can generate for automated callers.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

@@ -1,6 +1,6 @@
 # Cloud Endpoints
 
-This document covers the Cloud endpoints of the AMove Click API. They drive cloud-account management, storage (bucket/object) operations, OAuth authorization flows for third-party providers, and Fastr server-to-server / peer-to-peer / client file transfers running on the local agent. Unless noted, every endpoint requires a `token` query parameter obtained from the [Authentication](authentication.md) flow.
+This document covers the Cloud endpoints of the Amove Click API. They drive cloud-account management, storage (bucket/object) operations, OAuth authorization flows for third-party providers, and Fastr server-to-server / peer-to-peer / client file transfers running on the local agent. Unless noted, every endpoint requires a `token` query parameter obtained from the [Authentication](authentication.md) flow.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

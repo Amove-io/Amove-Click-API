@@ -1,6 +1,6 @@
 # Billing Endpoints
 
-This document provides detailed information about the billing and subscription endpoints in the AMove Click API.
+This document provides detailed information about the billing and subscription endpoints in the Amove Click API.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

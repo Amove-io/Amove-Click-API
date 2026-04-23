@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Click API uses the same error conventions as the AMove Web API, with one additional behavior specific to the local agent: authentication failures are surfaced as `401 Unauthorized` rather than `499`.
+The Click API uses the same error conventions as the Amove Web API, with one additional behavior specific to the local agent: authentication failures are surfaced as `401 Unauthorized` rather than `499`.
 
 | Status | Meaning |
 |---|---|

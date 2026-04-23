@@ -1,6 +1,6 @@
 # Management Endpoints
 
-This document covers the Management endpoints of the AMove Click API. These endpoints drive the desktop agent itself — reading agent status, configuring cloud drives / backups / SMB / NFS mounts, performing local file-system operations, checking for app updates, and broadcasting notifications over WebSocket.
+This document covers the Management endpoints of the Amove Click API. These endpoints drive the desktop agent itself — reading agent status, configuring cloud drives / backups / SMB / NFS mounts, performing local file-system operations, checking for app updates, and broadcasting notifications over WebSocket.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

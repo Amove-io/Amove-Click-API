@@ -1,4 +1,4 @@
-# AMove Click API Documentation
+# Amove Click API Documentation
 
 ## Introduction
 
@@ -33,7 +33,7 @@ Protected endpoints accept a token as a **query-string parameter** (`?token=...`
 GET http://localhost:29123/user/get_all_users?token=YOUR_TOKEN
 ```
 
-To obtain a token, use the [Authentication](authentication.md) endpoints — for example, `POST /authentication/login` with username and password. The agent uses the same JWT-based session model as the AMove Web API.
+To obtain a token, use the [Authentication](authentication.md) endpoints — for example, `POST /authentication/login` with username and password. The agent uses the same JWT-based session model as the Amove Web API.
 
 Some endpoints are public (no token required) — primarily signup and initial login flows. These are listed with "Auth Required: No".
 

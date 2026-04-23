@@ -1,6 +1,6 @@
 # Authentication Endpoints
 
-This document provides detailed information about the authentication-related endpoints in the AMove Click API. These endpoints handle signup, login, multi-factor authentication, Google authentication, password reset, and profile management.
+This document provides detailed information about the authentication-related endpoints in the Amove Click API. These endpoints handle signup, login, multi-factor authentication, Google authentication, password reset, and profile management.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

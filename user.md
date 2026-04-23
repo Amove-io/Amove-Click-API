@@ -1,6 +1,6 @@
 # User Endpoints
 
-This document provides detailed information about the user-management endpoints in the AMove Click API. All endpoints require a `token` query parameter obtained from the [Authentication](authentication.md) flow.
+This document provides detailed information about the user-management endpoints in the Amove Click API. All endpoints require a `token` query parameter obtained from the [Authentication](authentication.md) flow.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

@@ -1,6 +1,6 @@
 # AdSignal Endpoints
 
-This document provides detailed information about the AdSignal endpoints in the AMove Click API. AdSignal is a material-management feature for registering video assets and running frame/audio comparisons between them.
+This document provides detailed information about the AdSignal endpoints in the Amove Click API. AdSignal is a material-management feature for registering video assets and running frame/audio comparisons between them.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 

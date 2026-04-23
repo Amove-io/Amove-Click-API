@@ -1,6 +1,6 @@
 # Transfer History Endpoints
 
-This document provides detailed information about the transfer-history endpoints in the AMove Click API. Transfer history records every completed or failed transfer the agent has observed, whether it originated from the desktop app, a drive, a sync job, or a Fastr session.
+This document provides detailed information about the transfer-history endpoints in the Amove Click API. Transfer history records every completed or failed transfer the agent has observed, whether it originated from the desktop app, a drive, a sync job, or a Fastr session.
 
 > This API is bound to `http://localhost:29123` on a machine running the Amove desktop agent. It is not a hosted service.
 
